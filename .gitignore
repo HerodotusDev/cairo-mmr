@@ -1,0 +1,17 @@
+.tox
+**/__pycache__
+venv
+**/**.egg-info
+.python-version
+artifacts
+build
+.pytest_cache
+
+**/.DS_Store
+
+secrets.json
+.env
+
+node.json
+
+.protostar_cache

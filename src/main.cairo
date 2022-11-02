@@ -1,32 +1,19 @@
 %lang starknet
-from starkware.cairo.common.math import assert_nn
+from starkware.cairo.common.hash import hash2
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
-@storage_var
-func balance() -> (res: felt) {
-}
-
-@external
-func increase_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    amount: felt
-) {
-    with_attr error_message("Amount must be positive. Got: {amount}.") {
-        assert_nn(amount);
+@view
+func bag_peaks{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    peaks_len: felt, peaks: felt*
+) -> (res: felt) {
+    if (peaks_len == 1) {
+        return (res=[peaks]);
     }
 
-    let (res) = balance.read();
-    balance.write(res + amount);
-    return ();
-}
+    let last_peak = [peaks];
+    let (rec) = bag_peaks(peaks_len - 1, peaks + 1);
 
-@view
-func get_balance{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (res: felt) {
-    let (res) = balance.read();
-    return (res,);
-}
+    let (res) = hash2{hash_ptr=pedersen_ptr}(last_peak, rec);
 
-@constructor
-func constructor{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() {
-    balance.write(0);
-    return ();
+    return (res=res);
 }
