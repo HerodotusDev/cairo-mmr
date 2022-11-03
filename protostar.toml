@@ -8,3 +8,6 @@ libs_path = "lib"
 mmr = [
     "src/mmr.cairo",
 ]
+helpers = [
+    "src/helpers.cairo",
+]
