@@ -1,5 +1,5 @@
 %lang starknet
-from src.helpers import bit_length, all_ones
+from src.helpers import bit_length, all_ones, bitshift_left
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
 @external
