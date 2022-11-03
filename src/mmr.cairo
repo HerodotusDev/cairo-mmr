@@ -2,6 +2,8 @@
 from starkware.cairo.common.hash import hash2
 from starkware.cairo.common.math import assert_le
 from starkware.cairo.common.math_cmp import is_le
+from starkware.cairo.common.memcpy import memcpy
+from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
 from src.helpers import bit_length, all_ones, bitshift_left
@@ -81,10 +83,11 @@ func append{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(ele
     let (current_pos) = _last_pos.read();
     let (hash) = hash2{hash_ptr=pedersen_ptr}(current_pos, elem);
 
-    assert peaks[peaks_len] = hash;
-    let peaks_len = peaks_len + 1;
+    let (local append_peak) = alloc();
+    memcpy(append_peak, peaks, peaks_len);
+    assert append_peak[peaks_len] = hash;
 
-    append_rec(0, peaks_len, peaks);
+    let (peaks_len, peaks) = append_rec(0, peaks_len+1, append_peak);
 
     let (new_root) = bag_peaks(peaks_len, peaks);
     _root.write(new_root);
@@ -92,7 +95,7 @@ func append{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(ele
     return ();
 }
 
-func append_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(h: felt, peaks_len: felt, peaks: felt*) {
+func append_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(h: felt, peaks_len: felt, peaks: felt*) -> (p_len: felt, p: felt*) {
     alloc_locals;
 
     let (pos) = _last_pos.read();
@@ -111,11 +114,13 @@ func append_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
         let (current_pos) = _last_pos.read();
         let (parent_hash) = hash2{hash_ptr=pedersen_ptr}(current_pos, hash);
 
-        assert peaks[peaks_len] = parent_hash;
-        let peaks_len = peaks_len + 1;
+        
+        let (local merged_peaks) = alloc();
+        memcpy(merged_peaks, peaks, peaks_len);
+        assert merged_peaks[peaks_len] = parent_hash;
 
-        return append_rec(h+1, peaks_len, peaks);
+        return append_rec(h+1, peaks_len+1, merged_peaks);
     }
 
-    return ();
+    return (p_len=peaks_len, p=peaks);
 }
