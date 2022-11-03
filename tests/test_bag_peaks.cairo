@@ -1,8 +1,19 @@
 %lang starknet
-from src.main import bag_peaks
+from src.mmr import bag_peaks
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.hash import hash2
+
+@external
+func test_bag_peaks_empty{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
+    alloc_locals;
+
+    let (local peaks: felt*) = alloc();
+
+    %{ expect_revert() %}
+    bag_peaks(0, peaks);
+    return ();
+}
 
 @external
 func test_bag_peaks_1{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
