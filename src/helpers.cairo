@@ -18,3 +18,10 @@ func bit_length_rec{range_check_ptr}(num: felt, current_length: felt) -> (res: f
 
     return bit_length_rec(num, current_length + 1);
 }
+
+func all_ones{range_check_ptr}(bit_length: felt) -> (res: felt) {
+    assert_nn(bit_length);
+
+    let (max) = pow(2, bit_length);
+    return (res=max - 1);
+}
