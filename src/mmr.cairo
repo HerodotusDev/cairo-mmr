@@ -1,12 +1,12 @@
 %lang starknet
 from starkware.cairo.common.hash import hash2
-from starkware.cairo.common.math import assert_le
+from starkware.cairo.common.math import assert_le, assert_nn_le, assert_nn
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
-from src.helpers import bit_length, all_ones, bitshift_left
+from src.helpers import bit_length, all_ones, bitshift_left, array_contains
 
 @storage_var
 func _root() -> (res: felt) {
@@ -124,3 +124,81 @@ func append_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
 
     return (p_len=peaks_len, p=peaks);
 }
+
+@view
+func verify_proof{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    index: felt,
+    value: felt,
+    proof_len: felt,
+    proof: felt*,
+    peaks_len: felt, 
+    peaks: felt*
+) {
+    let (pos) = _last_pos.read();
+    assert_nn_le(index, pos);
+
+    let (bagged_peaks) = bag_peaks(peaks_len, peaks);
+    let (root) = _root.read();
+    assert bagged_peaks = root;
+
+    let height = 0;
+
+
+    return ();
+}
+
+func verify_proof_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    h: felt,
+    hash: felt,
+    pos: felt,
+    proof_len: felt,
+    proof: felt*,
+    peaks_len: felt,
+    peaks: felt*
+) -> (res: felt) {
+    alloc_locals;
+    
+    let (is_peak) = array_contains(hash, peaks_len, peaks);
+    if (is_peak == 1) {
+        return (res=1);
+    }
+    if (proof_len == 0) {
+        return(res=0);
+    }
+
+    let (last_pos) = _last_pos.read();
+    let invalid_pos = is_le(last_pos+1, pos);
+    if (invalid_pos == 1) {
+        return (res=0);
+    }
+
+    let current_sibling = [proof];
+    let (current_height) = height(pos);
+    let (next_height) = height(pos+1);
+
+    let is_higher = is_le(h+1, next_height);
+
+    local new_hash;
+    local new_pos;
+    if (is_higher == 1) {
+        // right child
+        let (hashed) = hash2{hash_ptr=pedersen_ptr}(current_sibling, hash);
+        new_hash = hashed;
+        new_pos = pos + 1;
+
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        // left child
+        let (hashed) = hash2{hash_ptr=pedersen_ptr}(hash, current_sibling);
+        new_hash = hashed;
+        let (shifted) = bitshift_left(2, h);
+        new_pos = pos + shifted;
+
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    }
+
+    return verify_proof_rec(h+1, new_hash, new_pos, proof_len-1, proof+1, peaks_len, peaks);
+}
+

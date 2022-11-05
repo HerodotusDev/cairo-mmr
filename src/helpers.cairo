@@ -40,3 +40,16 @@ func bitshift_left{range_check_ptr}(word: felt, num_bits: felt) -> (shifted: fel
     let (q, r) = unsigned_div_rem(k, 2 ** 64);
     return (r,);
 }
+
+func array_contains{range_check_ptr}(elem: felt, arr_len: felt, arr: felt*) -> (res: felt) {
+    assert_nn(arr_len);
+
+    if (arr_len == 0) {
+        return (res=0);
+    }
+    if ([arr] == elem) {
+        return (res=1);
+    }
+
+    return array_contains(elem, arr_len-1, arr+1);
+}
