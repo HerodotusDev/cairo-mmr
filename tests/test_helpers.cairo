@@ -1,5 +1,6 @@
 %lang starknet
-from src.helpers import bit_length, all_ones, bitshift_left
+from src.helpers import bit_length, all_ones, array_contains
+from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
 @external
@@ -55,6 +56,43 @@ func test_all_ones{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
 
     let (ones4) = all_ones(4);
     assert ones4 = 15;
+
+    return ();
+}
+
+@external
+func test_array_contains_negative{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
+    alloc_locals;
+
+    let (local arr) = alloc();
+
+    %{ expect_revert() %}
+    array_contains(1, -1, arr);
+    return ();
+}
+
+@external
+func test_array_contains{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
+    alloc_locals;
+
+    let (local arr) = alloc();
+
+    let (res) = array_contains(0, 0, arr);
+    assert res = 0;
+
+    assert arr[0] = 1;
+    let (res) = array_contains(0, 1, arr);
+    assert res = 0;
+    let (res) = array_contains(1, 1, arr);
+    assert res = 1;
+
+    assert arr[1] = 2;
+    let (res) = array_contains(0, 2, arr);
+    assert res = 0;
+    let (res) = array_contains(1, 2, arr);
+    assert res = 1;
+    let (res) = array_contains(2, 2, arr);
+    assert res = 1;
 
     return ();
 }
