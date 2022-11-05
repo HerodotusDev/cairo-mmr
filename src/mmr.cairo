@@ -17,14 +17,14 @@ func _last_pos() -> (res: felt) {
 }
 
 @view
-func get_root{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    ) -> (res: felt) {
+func get_root{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (res: felt) {
     return _root.read();
 }
 
 @view
-func get_last_pos{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    ) -> (res: felt) {
+func get_last_pos{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
+    res: felt
+) {
     return _last_pos.read();
 }
 
@@ -64,7 +64,9 @@ func height{range_check_ptr}(index: felt) -> (res: felt) {
 }
 
 @external
-func append{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(elem: felt, peaks_len: felt, peaks: felt*) {
+func append{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    elem: felt, peaks_len: felt, peaks: felt*
+) {
     alloc_locals;
 
     let (pos) = _last_pos.read();
@@ -87,7 +89,7 @@ func append{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(ele
     memcpy(append_peak, peaks, peaks_len);
     assert append_peak[peaks_len] = hash;
 
-    let (peaks_len, peaks) = append_rec(0, peaks_len+1, append_peak);
+    let (peaks_len, peaks) = append_rec(0, peaks_len + 1, append_peak);
 
     let (new_root) = bag_peaks(peaks_len, peaks);
     _root.write(new_root);
@@ -95,31 +97,32 @@ func append{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(ele
     return ();
 }
 
-func append_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(h: felt, peaks_len: felt, peaks: felt*) -> (p_len: felt, p: felt*) {
+func append_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    h: felt, peaks_len: felt, peaks: felt*
+) -> (p_len: felt, p: felt*) {
     alloc_locals;
 
     let (pos) = _last_pos.read();
-    let (next_height) = height(pos+1);
-    
-    let is_higher = is_le(h+1, next_height);
+    let (next_height) = height(pos + 1);
+
+    let is_higher = is_le(h + 1, next_height);
     if (is_higher == 1) {
-        _last_pos.write(pos+1);
+        _last_pos.write(pos + 1);
 
         let right_hash = peaks[peaks_len - 1];
         let left_hash = peaks[peaks_len - 2];
         let peaks_len = peaks_len - 2;
-        
+
         let (hash) = hash2{hash_ptr=pedersen_ptr}(left_hash, right_hash);
 
         let (current_pos) = _last_pos.read();
         let (parent_hash) = hash2{hash_ptr=pedersen_ptr}(current_pos, hash);
 
-        
         let (local merged_peaks) = alloc();
         memcpy(merged_peaks, peaks, peaks_len);
         assert merged_peaks[peaks_len] = parent_hash;
 
-        return append_rec(h+1, peaks_len+1, merged_peaks);
+        return append_rec(h + 1, peaks_len + 1, merged_peaks);
     }
 
     return (p_len=peaks_len, p=peaks);
@@ -127,12 +130,7 @@ func append_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
 
 @view
 func verify_proof{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    index: felt,
-    value: felt,
-    proof_len: felt,
-    proof: felt*,
-    peaks_len: felt, 
-    peaks: felt*
+    index: felt, value: felt, proof_len: felt, proof: felt*, peaks_len: felt, peaks: felt*
 ) {
     let (pos) = _last_pos.read();
     assert_nn_le(index, pos);
@@ -143,40 +141,33 @@ func verify_proof{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
 
     let height = 0;
 
-
     return ();
 }
 
 func verify_proof_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    h: felt,
-    hash: felt,
-    pos: felt,
-    proof_len: felt,
-    proof: felt*,
-    peaks_len: felt,
-    peaks: felt*
+    h: felt, hash: felt, pos: felt, proof_len: felt, proof: felt*, peaks_len: felt, peaks: felt*
 ) -> (res: felt) {
     alloc_locals;
-    
+
     let (is_peak) = array_contains(hash, peaks_len, peaks);
     if (is_peak == 1) {
         return (res=1);
     }
     if (proof_len == 0) {
-        return(res=0);
+        return (res=0);
     }
 
     let (last_pos) = _last_pos.read();
-    let invalid_pos = is_le(last_pos+1, pos);
+    let invalid_pos = is_le(last_pos + 1, pos);
     if (invalid_pos == 1) {
         return (res=0);
     }
 
     let current_sibling = [proof];
     let (current_height) = height(pos);
-    let (next_height) = height(pos+1);
+    let (next_height) = height(pos + 1);
 
-    let is_higher = is_le(h+1, next_height);
+    let is_higher = is_le(h + 1, next_height);
 
     local new_hash;
     local new_pos;
@@ -199,6 +190,5 @@ func verify_proof_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
         tempvar range_check_ptr = range_check_ptr;
     }
 
-    return verify_proof_rec(h+1, new_hash, new_pos, proof_len-1, proof+1, peaks_len, peaks);
+    return verify_proof_rec(h + 1, new_hash, new_pos, proof_len - 1, proof + 1, peaks_len, peaks);
 }
-

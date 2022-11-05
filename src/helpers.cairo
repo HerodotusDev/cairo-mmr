@@ -51,5 +51,5 @@ func array_contains{range_check_ptr}(elem: felt, arr_len: felt, arr: felt*) -> (
         return (res=1);
     }
 
-    return array_contains(elem, arr_len-1, arr+1);
+    return array_contains(elem, arr_len - 1, arr + 1);
 }
