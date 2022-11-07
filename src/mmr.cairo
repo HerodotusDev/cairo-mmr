@@ -132,6 +132,8 @@ func append_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
 func verify_proof{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     index: felt, value: felt, proof_len: felt, proof: felt*, peaks_len: felt, peaks: felt*
 ) {
+    alloc_locals;
+
     let (pos) = _last_pos.read();
     assert_nn_le(index, pos);
 
@@ -139,28 +141,22 @@ func verify_proof{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
     let (root) = _root.read();
     assert bagged_peaks = root;
 
-    let height = 0;
+    let (hash) = hash2{hash_ptr=pedersen_ptr}(index, value);
 
+    let (peak) = verify_proof_rec(0, hash, index, proof_len, proof); 
+    let (valid) = array_contains(peak, peaks_len, peaks);
+
+    assert valid = 1;
     return ();
 }
 
 func verify_proof_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    h: felt, hash: felt, pos: felt, proof_len: felt, proof: felt*, peaks_len: felt, peaks: felt*
+    h: felt, hash: felt, pos: felt, proof_len: felt, proof: felt*
 ) -> (res: felt) {
     alloc_locals;
 
-    let (is_peak) = array_contains(hash, peaks_len, peaks);
-    if (is_peak == 1) {
-        return (res=1);
-    }
     if (proof_len == 0) {
-        return (res=0);
-    }
-
-    let (last_pos) = _last_pos.read();
-    let invalid_pos = is_le(last_pos + 1, pos);
-    if (invalid_pos == 1) {
-        return (res=0);
+        return (res=hash);
     }
 
     let current_sibling = [proof];
@@ -174,21 +170,25 @@ func verify_proof_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
     if (is_higher == 1) {
         // right child
         let (hashed) = hash2{hash_ptr=pedersen_ptr}(current_sibling, hash);
-        new_hash = hashed;
         new_pos = pos + 1;
+
+        let (parent_hash) = hash2{hash_ptr=pedersen_ptr}(new_pos, hashed);
+        new_hash = parent_hash;
 
         tempvar pedersen_ptr = pedersen_ptr;
         tempvar range_check_ptr = range_check_ptr;
     } else {
         // left child
         let (hashed) = hash2{hash_ptr=pedersen_ptr}(hash, current_sibling);
-        new_hash = hashed;
         let (shifted) = bitshift_left(2, h);
         new_pos = pos + shifted;
+
+        let (parent_hash) = hash2{hash_ptr=pedersen_ptr}(new_pos, hashed);
+        new_hash = parent_hash;
 
         tempvar pedersen_ptr = pedersen_ptr;
         tempvar range_check_ptr = range_check_ptr;
     }
 
-    return verify_proof_rec(h + 1, new_hash, new_pos, proof_len - 1, proof + 1, peaks_len, peaks);
+    return verify_proof_rec(h + 1, new_hash, new_pos, proof_len-1, proof+1);
 }
