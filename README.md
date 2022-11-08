@@ -1,6 +1,7 @@
 # cairo-mmr
-An implementation of Merkle Mountain Ranges in cairo, using Pedersen hash. 
-This library should be used alongside an off-chain implmentation, keeping track of all the node hashes, to generate the proofs and compute the peaks
+An implementation of Merkle Mountain Ranges in cairo, using Pedersen hash. Should be used alongside an off-chain implmentation, keeping track of all the node hashes, to generate the proofs and compute the peaks
+
+> ⚠️ This repository contains a work in progress and should not be viewed as production-ready
 
 ## Set Up
 You should have [Protostar](https://docs.swmansion.com/protostar/) installed. See [installation](https://docs.swmansion.com/protostar/docs/tutorials/installation) docs.
