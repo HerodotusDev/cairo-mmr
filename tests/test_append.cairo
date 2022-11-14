@@ -16,7 +16,9 @@ func test_append_initial{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: Hash
     let (last_pos) = get_last_pos();
     let (root) = get_root();
     assert last_pos = 1;
-    assert root = node;
+
+    let (computed_root) = hash2{hash_ptr=pedersen_ptr}(1, node);
+    assert root = computed_root;
 
     return ();
 }
@@ -43,7 +45,8 @@ func test_append_1{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
     let (node3) = hash2{hash_ptr=pedersen_ptr}(3, node3_1);
 
     let (root) = get_root();
-    assert root = node3;
+    let (computed_root) = hash2{hash_ptr=pedersen_ptr}(3, node3);
+    assert root = computed_root;
 
     return ();
 }
@@ -75,10 +78,11 @@ func test_append_2{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
     assert last_pos = 4;
 
     let (node4) = hash2{hash_ptr=pedersen_ptr}(4, 4);
-    let (root_hash) = hash2{hash_ptr=pedersen_ptr}(node3, node4);
+    let (computed_root0) = hash2{hash_ptr=pedersen_ptr}(node3, node4);
+    let (computed_root) = hash2{hash_ptr=pedersen_ptr}(4, computed_root0);
 
     let (root) = get_root();
-    assert root = root_hash;
+    assert root = computed_root;
 
     return ();
 }
@@ -121,7 +125,8 @@ func test_append_3{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
     let (node7) = hash2{hash_ptr=pedersen_ptr}(7, node7_1);
 
     let (root) = get_root();
-    assert root = node7;
+    let (computed_root) = hash2{hash_ptr=pedersen_ptr}(7, node7);
+    assert root = computed_root;
 
     return ();
 }
@@ -169,10 +174,11 @@ func test_append_4{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
     assert last_pos = 8;
 
     let (node8) = hash2{hash_ptr=pedersen_ptr}(8, 8);
-    let (root_hash) = hash2{hash_ptr=pedersen_ptr}(node7, node8);
+    let (computed_root0) = hash2{hash_ptr=pedersen_ptr}(node7, node8);
+    let (computed_root) = hash2{hash_ptr=pedersen_ptr}(8, computed_root0);
 
     let (root) = get_root();
-    assert root = root_hash;
+    assert root = computed_root;
 
     return ();
 }

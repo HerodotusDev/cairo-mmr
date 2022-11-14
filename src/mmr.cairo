@@ -83,14 +83,15 @@ func append{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     _last_pos.write(pos + 1);
 
     if (pos == 0) {
-        let (root) = hash2{hash_ptr=pedersen_ptr}(1, elem);
+        let (root0) = hash2{hash_ptr=pedersen_ptr}(1, elem);
+        let (root) = hash2{hash_ptr=pedersen_ptr}(1, root0);
         _root.write(root);
         return ();
     }
 
-    let (bagged_peaks) = bag_peaks(peaks_len, peaks);
+    let (computed_root) = compute_root(peaks_len, peaks, pos);
     let (root) = _root.read();
-    assert bagged_peaks = root;
+    assert computed_root = root;
 
     let (current_pos) = _last_pos.read();
     let (hash) = hash2{hash_ptr=pedersen_ptr}(current_pos, elem);
@@ -101,7 +102,8 @@ func append{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     let (peaks_len, peaks) = append_rec(0, peaks_len + 1, append_peak);
 
-    let (new_root) = bag_peaks(peaks_len, peaks);
+    let (new_pos) = _last_pos.read();
+    let (new_root) = compute_root(peaks_len, peaks, new_pos);
     _root.write(new_root);
 
     return ();
@@ -147,9 +149,9 @@ func verify_proof{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
     let (pos) = _last_pos.read();
     assert_nn_le(index, pos);
 
-    let (bagged_peaks) = bag_peaks(peaks_len, peaks);
+    let (computed_root) = compute_root(peaks_len, peaks, pos);
     let (root) = _root.read();
-    assert bagged_peaks = root;
+    assert computed_root = root;
 
     let (hash) = hash2{hash_ptr=pedersen_ptr}(index, value);
 
