@@ -61,7 +61,8 @@ func test_all_ones{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
 }
 
 @external
-func test_array_contains_negative{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
+func test_array_contains_negative{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}(
+    ) {
     alloc_locals;
 
     let (local arr) = alloc();
