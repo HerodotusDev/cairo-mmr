@@ -135,7 +135,7 @@ func test_verify_proof_4_leaves{syscall_ptr: felt*, range_check_ptr, pedersen_pt
     assert proof[0] = node5;
     assert proof[1] = node3;
     verify_proof(4, 4, 2, proof, 1, peaks);
-    
+
     let (local proof: felt*) = alloc();
     assert proof[0] = node4;
     assert proof[1] = node3;
@@ -195,7 +195,7 @@ func test_verify_proof_5_leaves{syscall_ptr: felt*, range_check_ptr, pedersen_pt
     assert proof[0] = node5;
     assert proof[1] = node3;
     verify_proof(4, 4, 2, proof, 2, peaks);
-    
+
     let (local proof: felt*) = alloc();
     assert proof[0] = node4;
     assert proof[1] = node3;
@@ -208,7 +208,9 @@ func test_verify_proof_5_leaves{syscall_ptr: felt*, range_check_ptr, pedersen_pt
 }
 
 @external
-func test_verify_proof_invalid_index{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
+func test_verify_proof_invalid_index{
+    syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
+}() {
     alloc_locals;
 
     let (local peaks: felt*) = alloc();
@@ -232,7 +234,9 @@ func test_verify_proof_invalid_index{syscall_ptr: felt*, range_check_ptr, peders
 }
 
 @external
-func test_verify_proof_invalid_peaks{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
+func test_verify_proof_invalid_peaks{
+    syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
+}() {
     alloc_locals;
 
     let (local peaks: felt*) = alloc();
@@ -259,7 +263,9 @@ func test_verify_proof_invalid_peaks{syscall_ptr: felt*, range_check_ptr, peders
 }
 
 @external
-func test_verify_proof_invalid_proof{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
+func test_verify_proof_invalid_proof{
+    syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*
+}() {
     alloc_locals;
 
     let (local peaks: felt*) = alloc();

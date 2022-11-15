@@ -47,6 +47,16 @@ func bag_peaks{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 }
 
 @view
+func compute_root{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    peaks_len: felt, peaks: felt*, size: felt
+) -> (res: felt) {
+    let (bagged_peaks) = bag_peaks(peaks_len, peaks);
+    let (root) = hash2{hash_ptr=pedersen_ptr}(size, bagged_peaks);
+
+    return (res=root);
+}
+
+@view
 func height{range_check_ptr}(index: felt) -> (res: felt) {
     alloc_locals;
 
@@ -73,14 +83,15 @@ func append{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     _last_pos.write(pos + 1);
 
     if (pos == 0) {
-        let (root) = hash2{hash_ptr=pedersen_ptr}(1, elem);
+        let (root0) = hash2{hash_ptr=pedersen_ptr}(1, elem);
+        let (root) = hash2{hash_ptr=pedersen_ptr}(1, root0);
         _root.write(root);
         return ();
     }
 
-    let (bagged_peaks) = bag_peaks(peaks_len, peaks);
+    let (computed_root) = compute_root(peaks_len, peaks, pos);
     let (root) = _root.read();
-    assert bagged_peaks = root;
+    assert computed_root = root;
 
     let (current_pos) = _last_pos.read();
     let (hash) = hash2{hash_ptr=pedersen_ptr}(current_pos, elem);
@@ -91,7 +102,8 @@ func append{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     let (peaks_len, peaks) = append_rec(0, peaks_len + 1, append_peak);
 
-    let (new_root) = bag_peaks(peaks_len, peaks);
+    let (new_pos) = _last_pos.read();
+    let (new_root) = compute_root(peaks_len, peaks, new_pos);
     _root.write(new_root);
 
     return ();
@@ -137,13 +149,13 @@ func verify_proof{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
     let (pos) = _last_pos.read();
     assert_nn_le(index, pos);
 
-    let (bagged_peaks) = bag_peaks(peaks_len, peaks);
+    let (computed_root) = compute_root(peaks_len, peaks, pos);
     let (root) = _root.read();
-    assert bagged_peaks = root;
+    assert computed_root = root;
 
     let (hash) = hash2{hash_ptr=pedersen_ptr}(index, value);
 
-    let (peak) = verify_proof_rec(0, hash, index, proof_len, proof); 
+    let (peak) = verify_proof_rec(0, hash, index, proof_len, proof);
     let (valid) = array_contains(peak, peaks_len, peaks);
 
     assert valid = 1;
@@ -190,5 +202,5 @@ func verify_proof_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_chec
         tempvar range_check_ptr = range_check_ptr;
     }
 
-    return verify_proof_rec(h + 1, new_hash, new_pos, proof_len-1, proof+1);
+    return verify_proof_rec(h + 1, new_hash, new_pos, proof_len - 1, proof + 1);
 }
