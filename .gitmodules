@@ -1,0 +1,3 @@
+[submodule "cairo_mmr"]
+	path = lib/cairo_mmr
+	url = https://github.com/HerodotusDev/cairo-mmr
