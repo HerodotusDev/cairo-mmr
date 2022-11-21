@@ -1,13 +1,8 @@
-["protostar.config"]
-protostar_version = "0.6.0"
+[project]
+protostar-version = "0.7.0"
+lib-path = "lib"
 
-["protostar.project"]
-libs_path = "lib"
+[contracts]
+mmr = ["src/mmr.cairo"]
+helpers = ["src/helpers.cairo"]
 
-["protostar.contracts"]
-mmr = [
-    "src/mmr.cairo",
-]
-helpers = [
-    "src/helpers.cairo",
-]
