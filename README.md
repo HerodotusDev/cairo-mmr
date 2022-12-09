@@ -1,23 +1,28 @@
 # cairo-mmr
+
 An implementation of Merkle Mountain Ranges in cairo, using Pedersen hash. Should be used alongside an off-chain implmentation, keeping track of all the node hashes, to generate the proofs and compute the peaks
 
 > ⚠️ This repository contains a work in progress and should not be viewed as production-ready
 
 ## Set Up
+
 You should have [Protostar](https://docs.swmansion.com/protostar/) installed. See [installation](https://docs.swmansion.com/protostar/docs/tutorials/installation) docs.
 
 ### Project initialization
+
 ```bash
 protostar init <your-project-name>
 cd <your-project-name>
 ```
 
 ### Installing the library
+
 ```bash
 protostar install HerodotusDev/cairo-mmr
 ```
 
 ## Usage
+
 ```cairo
 // src/main.cairo
 
@@ -27,18 +32,17 @@ from cairo_mmr.src.mmr import append, verify_proof
 
 For demonstration purposes, in the next example we are going to keep track of the hashes and peaks on-chain. An off-chain solution should be used instead
 
-
 ```cairo
 func demo{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
     alloc_locals;
 
     let (local peaks: felt*) = alloc();
-    
+
     append(elem=1, peaks_len=0, peaks=peaks);
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
     assert peaks[0] = node1;
-    
+
     append(elem=2, peaks_len=1, peaks=peaks);
 
     let (node2) = hash2{hash_ptr=pedersen_ptr}(2, 2);
@@ -60,23 +64,38 @@ func demo{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
 }
 ```
 
+## Historical MMR
+
+Sometimes you might need to verify "immutable proofs", i.e. proofs that remains valid even when the top root hash of the tree gets updated.
+
+For that purpose, you can use the historical_mmr tree, it tracks every root hash and allows you to generate/verify proofs against it (you can check `tests/historical/*` to see some examples).
+
+```cairo
+%lang starknet
+from cairo_mmr.src.historical_mmr import append, verify_past_proof, get_inclusion_tx_hash_to_root
+```
+
 ## Development
 
 ### Project set up
+
 ```bash
 git clone git@github.com:HerodotusDev/cairo-mmr.git
 cd cairo-mmr
 ```
 
 ### Compile
+
 ```bash
 protostar build
 ```
 
 ### Test
+
 ```bash
-protostar test tests/
+protostar test
 ```
 
 ## License
+
 [GNU GPLv3](https://github.com/HerodotusDev/cairo-mmr/blob/main/LICENSE)

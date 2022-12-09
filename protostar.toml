@@ -1,8 +1,10 @@
 [project]
-protostar-version = "0.7.0"
+protostar-version = "0.8.1"
 lib-path = "lib"
+
+cairo-path = ["tests"]
 
 [contracts]
 mmr = ["src/mmr.cairo"]
+historical_mmr = ["src/historical_mmr.cairo"]
 helpers = ["src/helpers.cairo"]
-
