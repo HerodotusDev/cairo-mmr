@@ -1,5 +1,5 @@
 [project]
-protostar-version = "0.8.1"
+protostar-version = "0.9.1"
 lib-path = "lib"
 
 cairo-path = ["tests"]
