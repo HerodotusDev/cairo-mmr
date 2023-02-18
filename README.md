@@ -1,8 +1,6 @@
 # cairo-mmr
 
-An implementation of Merkle Mountain Ranges in cairo, using Pedersen hash. Should be used alongside an off-chain implmentation, keeping track of all the node hashes, to generate the proofs and compute the peaks
-
-> ⚠️ This repository contains a work in progress and should not be viewed as production-ready
+An implementation of Merkle Mountain Ranges in Cairo, using Pedersen hash. Should be used alongside an off-chain implementation, keeping track of all the node hashes, to generate the proofs and compute the peaks.
 
 ## Set Up
 
@@ -72,7 +70,7 @@ For that purpose, you can use the historical_mmr tree, it tracks every root hash
 
 ```cairo
 %lang starknet
-from cairo_mmr.src.historical_mmr import append, verify_past_proof, get_inclusion_tx_hash_to_root
+from cairo_mmr.src.historical_mmr import append, verify_past_proof, get_tree_size_to_root
 ```
 
 ## Development

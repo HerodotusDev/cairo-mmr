@@ -17,7 +17,7 @@ func _last_pos() -> (res: felt) {
 }
 
 @storage_var
-func _inclusion_tx_hash_to_root(tx_hash: felt) -> (res: felt) {
+func _tree_size_to_root(tree_size: felt) -> (res: felt) {
 }
 
 @view
@@ -33,10 +33,10 @@ func get_last_pos{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
 }
 
 @view
-func get_inclusion_tx_hash_to_root{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    tx_hash: felt
+func get_tree_size_to_root{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    tree_size: felt
 ) -> (res: felt) {
-    return _inclusion_tx_hash_to_root.read(tx_hash);
+    return _tree_size_to_root.read(tree_size);
 }
 
 @view
@@ -86,7 +86,7 @@ func height{range_check_ptr}(index: felt) -> (res: felt) {
 
 @external
 func append{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    elem: felt, peaks_len: felt, peaks: felt*, tx_hash: felt
+    elem: felt, peaks_len: felt, peaks: felt*
 ) -> (pos: felt) {
     alloc_locals;
 
@@ -96,7 +96,7 @@ func append{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     if (pos == 0) {
         let (root0) = hash2{hash_ptr=pedersen_ptr}(1, elem);
         let (root) = hash2{hash_ptr=pedersen_ptr}(1, root0);
-        _inclusion_tx_hash_to_root.write(tx_hash, root);
+        _tree_size_to_root.write(1, root);
         _root.write(root);
         return (pos=1);
     }
@@ -116,7 +116,7 @@ func append{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     let (new_pos) = _last_pos.read();
     let (new_root) = compute_root(peaks_len, peaks, new_pos);
-    _inclusion_tx_hash_to_root.write(tx_hash, new_root);
+    _tree_size_to_root.write(new_pos, new_root);
     _root.write(new_root);
 
     return (pos=new_pos);
@@ -161,12 +161,11 @@ func verify_past_proof{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_che
     proof: felt*,
     peaks_len: felt,
     peaks: felt*,
-    inclusion_tx_hash: felt,
     pos: felt,
 ) {
     alloc_locals;
     let (computed_root) = compute_root(peaks_len, peaks, pos);
-    let (root) = _inclusion_tx_hash_to_root.read(inclusion_tx_hash);
+    let (root) = _tree_size_to_root.read(pos);
     assert computed_root = root;
 
     let (hash) = hash2{hash_ptr=pedersen_ptr}(index, value);

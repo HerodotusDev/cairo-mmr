@@ -11,7 +11,7 @@ func test_verify_proof_1_leaf{syscall_ptr: felt*, range_check_ptr, pedersen_ptr:
     let (local peaks: felt*) = alloc();
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
-    append(elem=1, peaks_len=0, peaks=peaks, tx_hash=123);
+    append(elem=1, peaks_len=0, peaks=peaks);
 
     assert peaks[0] = node1;
 
@@ -29,12 +29,12 @@ func test_verify_past_proof_1_leaf{syscall_ptr: felt*, range_check_ptr, pedersen
     let (local peaks: felt*) = alloc();
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
-    let (cur_pos: felt) = append(elem=1, peaks_len=0, peaks=peaks, tx_hash=123);
+    let (cur_pos: felt) = append(elem=1, peaks_len=0, peaks=peaks);
 
     assert peaks[0] = node1;
 
     let (local proof: felt*) = alloc();
-    verify_past_proof(1, 1, 0, proof, 1, peaks, 123, cur_pos);
+    verify_past_proof(1, 1, 0, proof, 1, peaks, cur_pos);
 
     return ();
 }
@@ -48,14 +48,14 @@ func test_verify_past_proof_2_leaves{
     let (local peaks: felt*) = alloc();
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
-    let (cur_pos: felt) = append(elem=1, peaks_len=0, peaks=peaks, tx_hash=456);
+    let (cur_pos: felt) = append(elem=1, peaks_len=0, peaks=peaks);
 
     assert peaks[0] = node1;
 
     let (local proof: felt*) = alloc();
-    verify_past_proof(1, 1, 0, proof, 1, peaks, 456, cur_pos);
+    verify_past_proof(1, 1, 0, proof, 1, peaks, cur_pos);
 
-    let (cur_pos_2: felt) = append(elem=2, peaks_len=1, peaks=peaks, tx_hash=457);
+    let (cur_pos_2: felt) = append(elem=2, peaks_len=1, peaks=peaks);
 
     let (node2) = hash2{hash_ptr=pedersen_ptr}(2, 2);
     let (node3_1) = hash2{hash_ptr=pedersen_ptr}(node1, node2);
@@ -67,7 +67,7 @@ func test_verify_past_proof_2_leaves{
     let (local proof: felt*) = alloc();
     assert proof[0] = node1;
 
-    verify_past_proof(2, 2, 1, proof, 1, peaks, 457, cur_pos_2);
+    verify_past_proof(2, 2, 1, proof, 1, peaks, cur_pos_2);
     return ();
 }
 
@@ -78,10 +78,10 @@ func test_verify_proof_2_leaves{syscall_ptr: felt*, range_check_ptr, pedersen_pt
     let (local peaks: felt*) = alloc();
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
-    append(elem=1, peaks_len=0, peaks=peaks, tx_hash=456);
+    append(elem=1, peaks_len=0, peaks=peaks);
 
     assert peaks[0] = node1;
-    append(elem=2, peaks_len=1, peaks=peaks, tx_hash=467);
+    append(elem=2, peaks_len=1, peaks=peaks);
 
     let (node2) = hash2{hash_ptr=pedersen_ptr}(2, 2);
     let (node3_1) = hash2{hash_ptr=pedersen_ptr}(node1, node2);
@@ -109,27 +109,27 @@ func test_verify_past_proof_3_leaves{
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
     let (local peaks_1: felt*) = alloc();
-    let (last_pos_leaf_1) = append(elem=1, peaks_len=0, peaks=peaks_1, tx_hash=789);
+    let (last_pos_leaf_1) = append(elem=1, peaks_len=0, peaks=peaks_1);
     let (local proof_1: felt*) = alloc();
     assert peaks_1[0] = node1;
 
     let (local proof_2: felt*) = alloc();
     assert proof_2[0] = node1;
-    let (last_pos_leaf_2) = append(elem=2, peaks_len=1, peaks=peaks_1, tx_hash=7891);
+    let (last_pos_leaf_2) = append(elem=2, peaks_len=1, peaks=peaks_1);
     let (node2) = hash2{hash_ptr=pedersen_ptr}(2, 2);
     let (node3_1) = hash2{hash_ptr=pedersen_ptr}(node1, node2);
     let (node3) = hash2{hash_ptr=pedersen_ptr}(3, node3_1);
     let (local peaks_2: felt*) = alloc();
     assert peaks_2[0] = node3;
 
-    let (last_pos_leaf_3) = append(elem=4, peaks_len=1, peaks=peaks_2, tx_hash=7892);
+    let (last_pos_leaf_3) = append(elem=4, peaks_len=1, peaks=peaks_2);
     let (local proof_3: felt*) = alloc();
     let (node4) = hash2{hash_ptr=pedersen_ptr}(4, 4);
     assert peaks_2[1] = node4;
 
-    verify_past_proof(4, 4, 0, proof_3, 2, peaks_2, 7892, last_pos_leaf_3);
-    verify_past_proof(1, 1, 0, proof_1, 1, peaks_1, 789, last_pos_leaf_1);
-    verify_past_proof(2, 2, 1, proof_2, 1, peaks_2, 7891, last_pos_leaf_2);
+    verify_past_proof(4, 4, 0, proof_3, 2, peaks_2, last_pos_leaf_3);
+    verify_past_proof(1, 1, 0, proof_1, 1, peaks_1, last_pos_leaf_1);
+    verify_past_proof(2, 2, 1, proof_2, 1, peaks_2, last_pos_leaf_2);
     return ();
 }
 
@@ -140,10 +140,10 @@ func test_verify_proof_3_leaves{syscall_ptr: felt*, range_check_ptr, pedersen_pt
     let (local peaks: felt*) = alloc();
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
-    append(elem=1, peaks_len=0, peaks=peaks, tx_hash=789);
+    append(elem=1, peaks_len=0, peaks=peaks);
 
     assert peaks[0] = node1;
-    append(elem=2, peaks_len=1, peaks=peaks, tx_hash=789);
+    append(elem=2, peaks_len=1, peaks=peaks);
 
     let (node2) = hash2{hash_ptr=pedersen_ptr}(2, 2);
     let (node3_1) = hash2{hash_ptr=pedersen_ptr}(node1, node2);
@@ -151,7 +151,7 @@ func test_verify_proof_3_leaves{syscall_ptr: felt*, range_check_ptr, pedersen_pt
 
     let (local peaks: felt*) = alloc();
     assert peaks[0] = node3;
-    append(elem=4, peaks_len=1, peaks=peaks, tx_hash=789);
+    append(elem=4, peaks_len=1, peaks=peaks);
 
     let (node4) = hash2{hash_ptr=pedersen_ptr}(4, 4);
     assert peaks[1] = node4;
@@ -180,26 +180,26 @@ func test_verify_past_proof_4_leaves{
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
     let (local peaks_1: felt*) = alloc();
-    let (last_pos_leaf_1) = append(elem=1, peaks_len=0, peaks=peaks_1, tx_hash=101112);
+    let (last_pos_leaf_1) = append(elem=1, peaks_len=0, peaks=peaks_1);
     let (local proof_1: felt*) = alloc();
     assert peaks_1[0] = node1;
-    verify_past_proof(1, 1, 0, proof_1, 1, peaks_1, 101112, last_pos_leaf_1);
+    verify_past_proof(1, 1, 0, proof_1, 1, peaks_1, last_pos_leaf_1);
 
     let (local proof_2: felt*) = alloc();
     assert proof_2[0] = node1;
-    let (last_pos_leaf_2) = append(elem=2, peaks_len=1, peaks=peaks_1, tx_hash=101113);
+    let (last_pos_leaf_2) = append(elem=2, peaks_len=1, peaks=peaks_1);
     let (node2) = hash2{hash_ptr=pedersen_ptr}(2, 2);
     let (node3_1) = hash2{hash_ptr=pedersen_ptr}(node1, node2);
     let (node3) = hash2{hash_ptr=pedersen_ptr}(3, node3_1);
     let (local peaks_2: felt*) = alloc();
     assert peaks_2[0] = node3;
-    verify_past_proof(2, 2, 1, proof_2, 1, peaks_2, 101113, last_pos_leaf_2);
+    verify_past_proof(2, 2, 1, proof_2, 1, peaks_2, last_pos_leaf_2);
 
-    let (last_pos_leaf_3) = append(elem=4, peaks_len=1, peaks=peaks_2, tx_hash=101114);
+    let (last_pos_leaf_3) = append(elem=4, peaks_len=1, peaks=peaks_2);
     let (local proof_3: felt*) = alloc();
     let (node4) = hash2{hash_ptr=pedersen_ptr}(4, 4);
     assert peaks_2[1] = node4;
-    verify_past_proof(4, 4, 0, proof_3, 2, peaks_2, 101114, last_pos_leaf_3);
+    verify_past_proof(4, 4, 0, proof_3, 2, peaks_2, last_pos_leaf_3);
 
     let (node5) = hash2{hash_ptr=pedersen_ptr}(5, 5);
     let (node6_1) = hash2{hash_ptr=pedersen_ptr}(node4, node5);
@@ -207,14 +207,14 @@ func test_verify_past_proof_4_leaves{
     let (node7_1) = hash2{hash_ptr=pedersen_ptr}(node3, node6);
     let (node7) = hash2{hash_ptr=pedersen_ptr}(7, node7_1);
 
-    let (last_pos_leaf_4) = append(elem=5, peaks_len=2, peaks=peaks_2, tx_hash=101115);
+    let (last_pos_leaf_4) = append(elem=5, peaks_len=2, peaks=peaks_2);
 
     let (local peaks_3: felt*) = alloc();
     assert peaks_3[0] = node7;
     let (local proof_4: felt*) = alloc();
     assert proof_4[0] = node4;
     assert proof_4[1] = node3;
-    verify_past_proof(5, 5, 2, proof_4, 1, peaks_3, 101115, last_pos_leaf_4);
+    verify_past_proof(5, 5, 2, proof_4, 1, peaks_3, last_pos_leaf_4);
     return ();
 }
 
@@ -225,10 +225,10 @@ func test_verify_proof_4_leaves{syscall_ptr: felt*, range_check_ptr, pedersen_pt
     let (local peaks: felt*) = alloc();
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
-    append(elem=1, peaks_len=0, peaks=peaks, tx_hash=101112);
+    append(elem=1, peaks_len=0, peaks=peaks);
 
     assert peaks[0] = node1;
-    append(elem=2, peaks_len=1, peaks=peaks, tx_hash=101112);
+    append(elem=2, peaks_len=1, peaks=peaks);
 
     let (node2) = hash2{hash_ptr=pedersen_ptr}(2, 2);
     let (node3_1) = hash2{hash_ptr=pedersen_ptr}(node1, node2);
@@ -236,11 +236,11 @@ func test_verify_proof_4_leaves{syscall_ptr: felt*, range_check_ptr, pedersen_pt
 
     let (local peaks: felt*) = alloc();
     assert peaks[0] = node3;
-    append(elem=4, peaks_len=1, peaks=peaks, tx_hash=101112);
+    append(elem=4, peaks_len=1, peaks=peaks);
 
     let (node4) = hash2{hash_ptr=pedersen_ptr}(4, 4);
     assert peaks[1] = node4;
-    append(elem=5, peaks_len=2, peaks=peaks, tx_hash=101112);
+    append(elem=5, peaks_len=2, peaks=peaks);
 
     let (node5) = hash2{hash_ptr=pedersen_ptr}(5, 5);
     let (node6_1) = hash2{hash_ptr=pedersen_ptr}(node4, node5);
@@ -282,20 +282,20 @@ func test_verify_past_proof_5_leaves{
     let (local peaks: felt*) = alloc();
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
     let (local peaks_1: felt*) = alloc();
-    let (last_pos_leaf_1) = append(elem=1, peaks_len=0, peaks=peaks_1, tx_hash=101112);
+    let (last_pos_leaf_1) = append(elem=1, peaks_len=0, peaks=peaks_1);
     let (local proof_1: felt*) = alloc();
     assert peaks_1[0] = node1;
 
     let (local proof_2: felt*) = alloc();
     assert proof_2[0] = node1;
-    let (last_pos_leaf_2) = append(elem=2, peaks_len=1, peaks=peaks_1, tx_hash=101113);
+    let (last_pos_leaf_2) = append(elem=2, peaks_len=1, peaks=peaks_1);
     let (node2) = hash2{hash_ptr=pedersen_ptr}(2, 2);
     let (node3_1) = hash2{hash_ptr=pedersen_ptr}(node1, node2);
     let (node3) = hash2{hash_ptr=pedersen_ptr}(3, node3_1);
     let (local peaks_2: felt*) = alloc();
     assert peaks_2[0] = node3;
 
-    let (last_pos_leaf_3) = append(elem=4, peaks_len=1, peaks=peaks_2, tx_hash=101114);
+    let (last_pos_leaf_3) = append(elem=4, peaks_len=1, peaks=peaks_2);
     let (local proof_3: felt*) = alloc();
     let (node4) = hash2{hash_ptr=pedersen_ptr}(4, 4);
     assert peaks_2[1] = node4;
@@ -306,25 +306,25 @@ func test_verify_past_proof_5_leaves{
     let (node7_1) = hash2{hash_ptr=pedersen_ptr}(node3, node6);
     let (node7) = hash2{hash_ptr=pedersen_ptr}(7, node7_1);
 
-    let (last_pos_leaf_4) = append(elem=5, peaks_len=2, peaks=peaks_2, tx_hash=101115);
+    let (last_pos_leaf_4) = append(elem=5, peaks_len=2, peaks=peaks_2);
     let (local peaks_3: felt*) = alloc();
     assert peaks_3[0] = node7;
     let (local proof_4: felt*) = alloc();
     assert proof_4[0] = node4;
     assert proof_4[1] = node3;
 
-    let (last_pos_leaf_5) = append(elem=8, peaks_len=1, peaks=peaks_3, tx_hash=101116);
+    let (last_pos_leaf_5) = append(elem=8, peaks_len=1, peaks=peaks_3);
     let (local proof_5: felt*) = alloc();
     let (local peaks_4: felt*) = alloc();
     assert peaks_4[0] = node7;
     let (node8) = hash2{hash_ptr=pedersen_ptr}(8, 8);
     assert peaks_4[1] = node8;
 
-    verify_past_proof(8, 8, 0, proof_5, 2, peaks_4, 101116, last_pos_leaf_5);
-    verify_past_proof(2, 2, 1, proof_2, 1, peaks_2, 101113, last_pos_leaf_2);
-    verify_past_proof(1, 1, 0, proof_1, 1, peaks_1, 101112, last_pos_leaf_1);
-    verify_past_proof(4, 4, 0, proof_3, 2, peaks_2, 101114, last_pos_leaf_3);
-    verify_past_proof(5, 5, 2, proof_4, 1, peaks_3, 101115, last_pos_leaf_4);
+    verify_past_proof(8, 8, 0, proof_5, 2, peaks_4, last_pos_leaf_5);
+    verify_past_proof(2, 2, 1, proof_2, 1, peaks_2, last_pos_leaf_2);
+    verify_past_proof(1, 1, 0, proof_1, 1, peaks_1, last_pos_leaf_1);
+    verify_past_proof(4, 4, 0, proof_3, 2, peaks_2, last_pos_leaf_3);
+    verify_past_proof(5, 5, 2, proof_4, 1, peaks_3, last_pos_leaf_4);
     return ();
 }
 
@@ -335,10 +335,10 @@ func test_verify_proof_5_leaves{syscall_ptr: felt*, range_check_ptr, pedersen_pt
     let (local peaks: felt*) = alloc();
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
-    append(elem=1, peaks_len=0, peaks=peaks, tx_hash=111213);
+    append(elem=1, peaks_len=0, peaks=peaks);
 
     assert peaks[0] = node1;
-    append(elem=2, peaks_len=1, peaks=peaks, tx_hash=111213);
+    append(elem=2, peaks_len=1, peaks=peaks);
 
     let (node2) = hash2{hash_ptr=pedersen_ptr}(2, 2);
     let (node3_1) = hash2{hash_ptr=pedersen_ptr}(node1, node2);
@@ -346,11 +346,11 @@ func test_verify_proof_5_leaves{syscall_ptr: felt*, range_check_ptr, pedersen_pt
 
     let (local peaks: felt*) = alloc();
     assert peaks[0] = node3;
-    append(elem=4, peaks_len=1, peaks=peaks, tx_hash=111213);
+    append(elem=4, peaks_len=1, peaks=peaks);
 
     let (node4) = hash2{hash_ptr=pedersen_ptr}(4, 4);
     assert peaks[1] = node4;
-    append(elem=5, peaks_len=2, peaks=peaks, tx_hash=111213);
+    append(elem=5, peaks_len=2, peaks=peaks);
 
     let (node5) = hash2{hash_ptr=pedersen_ptr}(5, 5);
     let (node6_1) = hash2{hash_ptr=pedersen_ptr}(node4, node5);
@@ -360,7 +360,7 @@ func test_verify_proof_5_leaves{syscall_ptr: felt*, range_check_ptr, pedersen_pt
 
     let (local peaks: felt*) = alloc();
     assert peaks[0] = node7;
-    append(elem=8, peaks_len=1, peaks=peaks, tx_hash=111213);
+    append(elem=8, peaks_len=1, peaks=peaks);
 
     let (node8) = hash2{hash_ptr=pedersen_ptr}(8, 8);
     assert peaks[1] = node8;
@@ -400,7 +400,7 @@ func test_verify_proof_invalid_index{
     let (local peaks: felt*) = alloc();
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
-    append(elem=1, peaks_len=0, peaks=peaks, tx_hash=141516);
+    append(elem=1, peaks_len=0, peaks=peaks);
 
     let (node2) = hash2{hash_ptr=pedersen_ptr}(2, 2);
     let (node3_1) = hash2{hash_ptr=pedersen_ptr}(node1, node2);
@@ -426,10 +426,10 @@ func test_verify_proof_invalid_peaks{
     let (local peaks: felt*) = alloc();
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
-    append(elem=1, peaks_len=0, peaks=peaks, tx_hash=161718);
+    append(elem=1, peaks_len=0, peaks=peaks);
 
     assert peaks[0] = node1;
-    append(elem=2, peaks_len=1, peaks=peaks, tx_hash=161718);
+    append(elem=2, peaks_len=1, peaks=peaks);
 
     let (node2) = hash2{hash_ptr=pedersen_ptr}(2, 2);
     let (node3_1) = hash2{hash_ptr=pedersen_ptr}(node1, node2);
@@ -455,10 +455,10 @@ func test_verify_proof_invalid_proof{
     let (local peaks: felt*) = alloc();
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
-    append(elem=1, peaks_len=0, peaks=peaks, tx_hash=181920);
+    append(elem=1, peaks_len=0, peaks=peaks);
 
     assert peaks[0] = node1;
-    append(elem=2, peaks_len=1, peaks=peaks, tx_hash=181920);
+    append(elem=2, peaks_len=1, peaks=peaks);
 
     let (node2) = hash2{hash_ptr=pedersen_ptr}(2, 2);
     let (node3_1) = hash2{hash_ptr=pedersen_ptr}(node1, node2);

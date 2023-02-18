@@ -1,5 +1,5 @@
 %lang starknet
-from src.historical_mmr import append, get_root, get_last_pos, get_inclusion_tx_hash_to_root
+from src.historical_mmr import append, get_root, get_last_pos, get_tree_size_to_root
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.hash import hash2
 from starkware.cairo.common.alloc import alloc
@@ -10,7 +10,7 @@ func test_append_initial{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: Hash
 
     let (local peaks: felt*) = alloc();
 
-    append(elem=1, peaks_len=0, peaks=peaks, tx_hash=123);
+    append(elem=1, peaks_len=0, peaks=peaks);
     let (node) = hash2{hash_ptr=pedersen_ptr}(1, 1);
 
     let (last_pos) = get_last_pos();
@@ -32,10 +32,10 @@ func test_append_1{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
     let (last_pos) = get_last_pos();
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
-    append(elem=1, peaks_len=0, peaks=peaks, tx_hash=123);
+    append(elem=1, peaks_len=0, peaks=peaks);
 
     assert peaks[0] = node1;
-    append(elem=2, peaks_len=1, peaks=peaks, tx_hash=123);
+    append(elem=2, peaks_len=1, peaks=peaks);
 
     let (last_pos) = get_last_pos();
     assert last_pos = 3;
@@ -47,7 +47,8 @@ func test_append_1{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
     let (root) = get_root();
     let (computed_root) = hash2{hash_ptr=pedersen_ptr}(3, node3);
     assert root = computed_root;
-    let (tx_hash_root) = get_inclusion_tx_hash_to_root(tx_hash=123);
+    let (last_pos) = get_last_pos();
+    let (tx_hash_root) = get_tree_size_to_root(last_pos);
     assert tx_hash_root = root;
 
     return ();
@@ -62,10 +63,10 @@ func test_append_2{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
     let (last_pos) = get_last_pos();
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
-    append(elem=1, peaks_len=0, peaks=peaks, tx_hash=456);
+    append(elem=1, peaks_len=0, peaks=peaks);
 
     assert peaks[0] = node1;
-    append(elem=2, peaks_len=1, peaks=peaks, tx_hash=456);
+    append(elem=2, peaks_len=1, peaks=peaks);
 
     let (node2) = hash2{hash_ptr=pedersen_ptr}(2, 2);
     let (node3_1) = hash2{hash_ptr=pedersen_ptr}(node1, node2);
@@ -74,7 +75,7 @@ func test_append_2{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
     let (local peaks: felt*) = alloc();
 
     assert peaks[0] = node3;
-    append(elem=4, peaks_len=1, peaks=peaks, tx_hash=456);
+    append(elem=4, peaks_len=1, peaks=peaks);
 
     let (last_pos) = get_last_pos();
     assert last_pos = 4;
@@ -85,7 +86,8 @@ func test_append_2{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
 
     let (root) = get_root();
     assert root = computed_root;
-    let (tx_hash_root) = get_inclusion_tx_hash_to_root(tx_hash=456);
+    let (last_pos) = get_last_pos();
+    let (tx_hash_root) = get_tree_size_to_root(last_pos);
     assert tx_hash_root = root;
 
     return ();
@@ -100,10 +102,10 @@ func test_append_3{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
     let (last_pos) = get_last_pos();
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
-    append(elem=1, peaks_len=0, peaks=peaks, tx_hash=789);
+    append(elem=1, peaks_len=0, peaks=peaks);
 
     assert peaks[0] = node1;
-    append(elem=2, peaks_len=1, peaks=peaks, tx_hash=789);
+    append(elem=2, peaks_len=1, peaks=peaks);
 
     let (node2) = hash2{hash_ptr=pedersen_ptr}(2, 2);
     let (node3_1) = hash2{hash_ptr=pedersen_ptr}(node1, node2);
@@ -112,12 +114,12 @@ func test_append_3{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
     let (local peaks: felt*) = alloc();
 
     assert peaks[0] = node3;
-    append(elem=4, peaks_len=1, peaks=peaks, tx_hash=789);
+    append(elem=4, peaks_len=1, peaks=peaks);
 
     let (node4) = hash2{hash_ptr=pedersen_ptr}(4, 4);
     assert peaks[1] = node4;
 
-    append(elem=5, peaks_len=2, peaks=peaks, tx_hash=789);
+    append(elem=5, peaks_len=2, peaks=peaks);
 
     let (last_pos) = get_last_pos();
     assert last_pos = 7;
@@ -131,7 +133,8 @@ func test_append_3{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
     let (root) = get_root();
     let (computed_root) = hash2{hash_ptr=pedersen_ptr}(7, node7);
     assert root = computed_root;
-    let (tx_hash_root) = get_inclusion_tx_hash_to_root(tx_hash=789);
+    let (last_pos) = get_last_pos();
+    let (tx_hash_root) = get_tree_size_to_root(last_pos);
     assert tx_hash_root = root;
 
     return ();
@@ -146,10 +149,10 @@ func test_append_4{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
     let (last_pos) = get_last_pos();
 
     let (node1) = hash2{hash_ptr=pedersen_ptr}(1, 1);
-    append(elem=1, peaks_len=0, peaks=peaks, tx_hash=101112);
+    append(elem=1, peaks_len=0, peaks=peaks);
 
     assert peaks[0] = node1;
-    append(elem=2, peaks_len=1, peaks=peaks, tx_hash=101112);
+    append(elem=2, peaks_len=1, peaks=peaks);
 
     let (node2) = hash2{hash_ptr=pedersen_ptr}(2, 2);
     let (node3_1) = hash2{hash_ptr=pedersen_ptr}(node1, node2);
@@ -158,12 +161,12 @@ func test_append_4{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
     let (local peaks: felt*) = alloc();
 
     assert peaks[0] = node3;
-    append(elem=4, peaks_len=1, peaks=peaks, tx_hash=101112);
+    append(elem=4, peaks_len=1, peaks=peaks);
 
     let (node4) = hash2{hash_ptr=pedersen_ptr}(4, 4);
     assert peaks[1] = node4;
 
-    append(elem=5, peaks_len=2, peaks=peaks, tx_hash=101112);
+    append(elem=5, peaks_len=2, peaks=peaks);
 
     let (node5) = hash2{hash_ptr=pedersen_ptr}(5, 5);
     let (node6_1) = hash2{hash_ptr=pedersen_ptr}(node4, node5);
@@ -174,7 +177,7 @@ func test_append_4{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
     let (local peaks: felt*) = alloc();
 
     assert peaks[0] = node7;
-    append(elem=8, peaks_len=1, peaks=peaks, tx_hash=101112);
+    append(elem=8, peaks_len=1, peaks=peaks);
 
     let (last_pos) = get_last_pos();
     assert last_pos = 8;
@@ -185,7 +188,8 @@ func test_append_4{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuilti
 
     let (root) = get_root();
     assert root = computed_root;
-    let (tx_hash_root) = get_inclusion_tx_hash_to_root(tx_hash=101112);
+    let (last_pos) = get_last_pos();
+    let (tx_hash_root) = get_tree_size_to_root(tree_size=last_pos);
     assert tx_hash_root = root;
     return ();
 }
