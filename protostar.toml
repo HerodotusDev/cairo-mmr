@@ -7,4 +7,6 @@ cairo-path = ["tests"]
 [contracts]
 mmr = ["src/mmr.cairo"]
 historical_mmr = ["src/historical_mmr.cairo"]
+stateless_mmr = ["src/stateless_mmr.cairo"]
+
 helpers = ["src/helpers.cairo"]

@@ -1,6 +1,6 @@
 # cairo-mmr
 
-An implementation of Merkle Mountain Ranges in Cairo, using Pedersen hash. Should be used alongside an off-chain implementation, keeping track of all the node hashes, to generate the proofs and compute the peaks.
+An implementation of Merkle Mountain Ranges in Cairo, using Pedersen hash. Should be used alongside an off-chain implementation, keeping track of all the node hashes, to generate the proofs and compute the peaks (unless you are using the stateless variant).
 
 ## Set Up
 
@@ -28,7 +28,7 @@ protostar install HerodotusDev/cairo-mmr
 from cairo_mmr.src.mmr import append, verify_proof
 ```
 
-For demonstration purposes, in the next example we are going to keep track of the hashes and peaks on-chain. An off-chain solution should be used instead
+For demonstration purposes, in the next example we are going to keep track of the hashes and peaks on-chain. An off-chain solution should be used instead.
 
 ```cairo
 func demo{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
@@ -71,6 +71,15 @@ For that purpose, you can use the historical_mmr tree, it tracks every root hash
 ```cairo
 %lang starknet
 from cairo_mmr.src.historical_mmr import append, verify_past_proof, get_tree_size_to_root
+```
+
+## Stateless MMR
+
+A stateless MMR that does not write/read from contract storage and relies only on passed function parameters.
+
+```cairo
+%lang starknet
+from cairo_mmr.src.stateless_mmr import append, verify_proof
 ```
 
 ## Development
