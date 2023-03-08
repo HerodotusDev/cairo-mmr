@@ -54,6 +54,53 @@ func height{range_check_ptr}(index: felt) -> (res: felt) {
 }
 
 @external
+func multi_append{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    elems_len: felt, elems: felt*, peaks_len: felt, peaks: felt*, last_pos: felt, last_root: felt
+) -> (new_pos: felt, new_root: felt) {
+    return multi_append_rec(elems_len, elems, peaks_len, peaks, last_pos, last_root);
+}
+
+func multi_append_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    elems_len: felt,
+    elems: felt*,
+    last_peaks_len: felt,
+    last_peaks: felt*,
+    last_pos: felt,
+    last_root: felt,
+) -> (new_pos: felt, new_root: felt) {
+    alloc_locals;
+
+    let elem = [elems];
+    let pos = last_pos + 1;
+    if (last_pos == 0) {
+        let (root0) = hash2{hash_ptr=pedersen_ptr}(1, elem);
+        let (root) = hash2{hash_ptr=pedersen_ptr}(1, root0);
+        if (elems_len == 1) {
+            return (new_pos=pos, new_root=root);
+        }
+        let (local peaks: felt*) = alloc();
+        assert peaks[0] = root0;
+        return multi_append_rec(elems_len - 1, elems + 1, 1, peaks, pos, root);
+    }
+
+    let (computed_root) = compute_root(last_peaks_len, last_peaks, last_pos);
+    assert computed_root = last_root;
+
+    let (hash) = hash2{hash_ptr=pedersen_ptr}(pos, elem);
+
+    let (local append_peak) = alloc();
+    memcpy(append_peak, last_peaks, last_peaks_len);
+    assert append_peak[last_peaks_len] = hash;
+
+    let (peaks_len, peaks, new_pos) = append_rec(0, last_peaks_len + 1, append_peak, pos);
+    let (new_root) = compute_root(peaks_len, peaks, new_pos);
+    if (elems_len == 1) {
+        return (new_pos=new_pos, new_root=new_root);
+    }
+    return multi_append_rec(elems_len - 1, elems + 1, peaks_len, peaks, new_pos, new_root);
+}
+
+@external
 func append{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     elem: felt, peaks_len: felt, peaks: felt*, last_pos: felt, last_root: felt
 ) -> (new_pos: felt, new_root: felt) {
