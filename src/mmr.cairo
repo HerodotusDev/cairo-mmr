@@ -141,6 +141,82 @@ func append_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
 }
 
 @view
+func update{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    index: felt, old_value: felt, updated_value: felt, proof_len: felt, proof: felt*, peaks_len: felt, peaks: felt*
+) {
+    alloc_locals;
+
+    let (pos) = _last_pos.read();
+    assert_nn_le(index, pos);
+
+    let (computed_root) = compute_root(peaks_len, peaks, pos);
+    let (root) = _root.read();
+    assert computed_root = root;
+
+    let (old_hash) = hash2{hash_ptr=pedersen_ptr}(index, old_value);
+    let (updated_hash) = hash2{hash_ptr=pedersen_ptr}(index, updated_value);
+
+    let (old_peak, new_peak) = update_rec(0, old_hash, updated_hash, index, proof_len, proof);
+    let (valid) = array_contains(old_peak, peaks_len, peaks);
+
+    assert valid = 1;
+
+    //TODO: update root with new peak
+
+    return ();
+}
+
+func update_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    h: felt, old_hash: felt, updated_hash: felt, pos: felt, proof_len: felt, proof: felt*
+) -> (old_peak: felt, new_peak: felt) {
+    alloc_locals;
+
+    if (proof_len == 0) {
+        return (old_peak=old_hash, new_peak=updated_hash);
+    }
+
+    let current_sibling = [proof];
+    let (current_height) = height(pos);
+    let (next_height) = height(pos + 1);
+
+    let is_higher = is_le(h + 1, next_height);
+
+    local new_hash;
+    local new_hash_updated;
+    local new_pos;
+    if (is_higher == 1) {
+        // right child
+        let (hashed) = hash2{hash_ptr=pedersen_ptr}(current_sibling, old_hash);
+        let (hashed_updated) = hash2{hash_ptr=pedersen_ptr}(current_sibling, updated_hash);
+        new_pos = pos + 1;
+
+        let (parent_hash) = hash2{hash_ptr=pedersen_ptr}(new_pos, hashed);
+        let (parent_updated) = hash2{hash_ptr=pedersen_ptr}(new_pos, hashed_updated);
+        new_hash = parent_hash;
+        new_hash_updated = parent_updated;
+
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    } else {
+        // left child
+        let (hashed) = hash2{hash_ptr=pedersen_ptr}(old_hash, current_sibling);
+        let (hashed_updated) = hash2{hash_ptr=pedersen_ptr}(updated_hash, current_sibling);
+        let (shifted) = bitshift_left(2, h);
+        new_pos = pos + shifted;
+
+        let (parent_hash) = hash2{hash_ptr=pedersen_ptr}(new_pos, hashed);
+        let (parent_updated) = hash2{hash_ptr=pedersen_ptr}(new_pos, hashed_updated);
+        new_hash = parent_hash;
+        new_hash_updated = parent_updated;
+
+        tempvar pedersen_ptr = pedersen_ptr;
+        tempvar range_check_ptr = range_check_ptr;
+    }
+
+    return update_rec(h + 1, new_hash, new_hash_updated, new_pos, proof_len - 1, proof + 1);
+}
+
+@view
 func verify_proof{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     index: felt, value: felt, proof_len: felt, proof: felt*, peaks_len: felt, peaks: felt*
 ) {
