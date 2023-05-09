@@ -5,6 +5,7 @@ from starkware.cairo.common.math import assert_nn
 from starkware.cairo.common.math_cmp import is_le
 from starkware.cairo.common.math import unsigned_div_rem
 from starkware.cairo.common.math import assert_le
+from starkware.cairo.common.alloc import alloc
 
 func bit_length{range_check_ptr}(num: felt) -> (res: felt) {
     assert_nn(num);
@@ -52,4 +53,27 @@ func array_contains{range_check_ptr}(elem: felt, arr_len: felt, arr: felt*) -> (
     }
 
     return array_contains(elem, arr_len - 1, arr + 1);
+}
+
+func replace{range_check_ptr}(old_elem: felt, new_elem: felt, arr_len: felt, arr: felt*) -> (res: felt*) {
+    alloc_locals;
+    assert_nn(arr_len);
+    
+    let (local res_arr) = alloc();
+
+    return replace_rec(old_elem, new_elem, arr_len, arr, 0, res_arr);
+}
+
+func replace_rec{range_check_ptr}(old_elem: felt, new_elem: felt, arr_len: felt, arr: felt*, res_arr_len: felt, res_arr: felt*) -> (res: felt*) {
+    if (arr_len == res_arr_len) {
+        return (res=res_arr);
+    }
+
+    if (arr[res_arr_len] == old_elem) {
+        assert res_arr[res_arr_len] = new_elem;
+    } else {
+        assert res_arr[res_arr_len] = arr[res_arr_len];
+    }
+
+    return replace_rec(old_elem, new_elem, arr_len, arr, res_arr_len + 1, res_arr);
 }

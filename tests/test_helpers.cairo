@@ -1,5 +1,5 @@
 %lang starknet
-from src.helpers import bit_length, all_ones, array_contains
+from src.helpers import bit_length, all_ones, array_contains, replace
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
@@ -94,6 +94,43 @@ func test_array_contains{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: Hash
     assert res = 1;
     let (res) = array_contains(2, 2, arr);
     assert res = 1;
+
+    return ();
+}
+
+@external
+func test_replace{syscall_ptr: felt*, range_check_ptr, pedersen_ptr: HashBuiltin*}() {
+    alloc_locals;
+
+    let (local arr) = alloc();
+    assert arr[0] = 24;
+    assert arr[1] = 10;
+    assert arr[2] = 420;
+    assert arr[3] = 100;
+
+    let (res) = replace(24, 5, 4, arr);
+    assert res[0] = 5;
+    assert res[1] = 10;
+    assert res[2] = 420;
+    assert res[3] = 100;
+
+    let (res) = replace(10, 48, 4, arr);
+    assert res[0] = 24;
+    assert res[1] = 48;
+    assert res[2] = 420;
+    assert res[3] = 100;
+
+    let (res) = replace(420, 69, 4, arr);
+    assert res[0] = 24;
+    assert res[1] = 10;
+    assert res[2] = 69;
+    assert res[3] = 100;
+
+    let (res) = replace(100, 200, 4, arr);
+    assert res[0] = 24;
+    assert res[1] = 10;
+    assert res[2] = 420;
+    assert res[3] = 200;
 
     return ();
 }
