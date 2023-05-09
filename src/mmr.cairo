@@ -6,7 +6,7 @@ from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
-from src.helpers import bit_length, all_ones, bitshift_left, array_contains
+from src.helpers import bit_length, all_ones, bitshift_left, array_contains, replace
 
 @storage_var
 func _root() -> (res: felt) {
@@ -140,7 +140,7 @@ func append_rec{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}
     return (p_len=peaks_len, p=peaks);
 }
 
-@view
+@external
 func update{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
     index: felt, old_value: felt, updated_value: felt, proof_len: felt, proof: felt*, peaks_len: felt, peaks: felt*
 ) {
@@ -161,7 +161,9 @@ func update{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
 
     assert valid = 1;
 
-    //TODO: update root with new peak
+    let (new_peaks) = replace(old_peak, new_peak, peaks_len, peaks);
+    let (new_root) = compute_root(peaks_len, new_peaks, pos);
+    _root.write(new_root);
 
     return ();
 }
