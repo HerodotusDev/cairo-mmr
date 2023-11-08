@@ -1,4 +1,4 @@
-![](https://github.dev/HerodotusDev/cairo-mmr/banner.png)
+![](https://github.com/HerodotusDev/cairo-mmr/banner.png)
 
 # cairo-mmr
 
