@@ -1,3 +1,5 @@
+![](https://github.dev/HerodotusDev/cairo-mmr/banner.png)
+
 # cairo-mmr
 
 An implementation of Merkle Mountain Ranges in Cairo, using Pedersen hash. Should be used alongside an off-chain implementation, keeping track of all the node hashes, to generate the proofs and compute the peaks (unless you are using the stateless variant).
